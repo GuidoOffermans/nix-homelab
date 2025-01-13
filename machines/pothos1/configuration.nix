@@ -22,7 +22,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     users = {
-      eh8 = {
+      pothos = {
         imports = [
           ./../../modules/home-manager/base.nix
         ];

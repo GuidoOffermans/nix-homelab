@@ -72,7 +72,7 @@
     tailscale.enable = true;
   };
 
-  users.users.eh8.home = "/Users/guidooffermans";
+  users.users.guidooffermans.home = "/Users/guidooffermans";
 
   system = {
     stateVersion = 5;

@@ -17,14 +17,14 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     users = {
-      # eh8 = {
+      guidooffermans = {
       #   imports = [
       # ./../../modules/home-manager/base.nix
       # ./../../modules/home-manager/fonts.nix
       # ./../../modules/home-manager/alacritty.nix
       # ./../../modules/home-manager/1password.nix
       #   ];
-      # };
+      };
     };
   };
 

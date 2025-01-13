@@ -10,10 +10,10 @@
   ];
 
   home = {
-    username = "eh8";
+    username = "pothos";
     homeDirectory = lib.mkMerge [
-      (lib.mkIf pkgs.stdenv.isLinux "/home/eh8")
-      (lib.mkIf pkgs.stdenv.isDarwin "/Users/eh8")
+      (lib.mkIf pkgs.stdenv.isLinux "/home/pothos")
+      (lib.mkIf pkgs.stdenv.isDarwin "/Users/guidooffermans")
     ];
     stateVersion = "23.11";
     sessionVariables = lib.mkIf pkgs.stdenv.isDarwin {
@@ -25,37 +25,37 @@
     git = {
       enable = true;
     };
-    helix = {
-      enable = true;
-      defaultEditor = true;
-      settings = {
-        theme = "dark_high_contrast";
-      };
-    };
-    fzf = {
-      enable = true;
-      enableZshIntegration = true;
-    };
-    zellij = {
-      enable = true;
-      settings = {
-        theme = "dracula";
-      };
-    };
-    tealdeer = {
-      enable = true;
-      settings.updates.auto_update = true;
-    };
-    lsd = {
-      enable = true;
-      enableAliases = true;
-    };
-    direnv = {
-      enable = true;
-      enableZshIntegration = true;
-      nix-direnv.enable = true;
-    };
-    fastfetch.enable = true;
+    # helix = {
+    #   enable = true;
+    #   defaultEditor = true;
+    #   settings = {
+    #     theme = "dark_high_contrast";
+    #   };
+    # };
+    # fzf = {
+    #   enable = true;
+    #   enableZshIntegration = true;
+    # };
+    # zellij = {
+    #   enable = true;
+    #   settings = {
+    #     theme = "dracula";
+    #   };
+    # };
+    # tealdeer = {
+    #   enable = true;
+    #   settings.updates.auto_update = true;
+    # };
+    # lsd = {
+    #   enable = true;
+    #   enableAliases = true;
+    # };
+    # direnv = {
+    #   enable = true;
+    #   enableZshIntegration = true;
+    #   nix-direnv.enable = true;
+    # };
+    # fastfetch.enable = true;
   };
 
   # Nicely reload system units when changing configs
