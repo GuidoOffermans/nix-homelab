@@ -14,7 +14,7 @@
     ./../../modules/nixos/remote-unlock.nix
     ./../../modules/nixos/auto-update.nix
 
-    ./../../services/tailscale.nix
+    # ./../../services/tailscale.nix
   ];
 
   home-manager = {
