@@ -33,4 +33,4 @@ sopsupdate:
   for file in secrets/*; do sops updatekeys "$file"; done
 
 build-iso:
-  nix build .#nixosConfigurations.iso1chng.config.system.build.isoImage
+  nix build .#nixosConfigurations.isopothos.config.system.build.isoImage
