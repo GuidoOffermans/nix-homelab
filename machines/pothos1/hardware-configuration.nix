@@ -18,6 +18,7 @@
         "usbhid"
         "usb_storage"
         "sd_mod"
+        "e1000e"
       ];
       kernelModules = [ "dm-snapshot" ];
       luks = {
