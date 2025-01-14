@@ -20,21 +20,21 @@
         "sd_mod"
       ];
       kernelModules = [ "dm-snapshot" ];
-    };
-    kernelModules = [ "kvm-intel" ];
-    extraModulePackages = [ ];
-    luks = {
-      reusePassphrases = true;
-      devices = {
-        "cryptroot" = {
-          device = "/dev/nvme0n1";
-          allowDiscards = true;
-        };
-        "fun" = {
-          device = "/dev/sda1";
+      luks = {
+        reusePassphrases = true;
+        devices = {
+          "cryptroot" = {
+            device = "/dev/nvme0n1";
+            allowDiscards = true;
+          };
+          "fun" = {
+            device = "/dev/sda1";
+          };
         };
       };
     };
+    kernelModules = [ "kvm-intel" ];
+    extraModulePackages = [ ];
   };
 
   fileSystems = {
