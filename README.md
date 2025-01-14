@@ -42,3 +42,6 @@ ip: 10.10.10.21
 
 [nixos@isopothos:~]$ sudo /run/current-system/sw/bin/bash install.sh
 Linux detected
+
+curl -fsSL -o install.sh https://raw.githubusercontent.com/GuidoOffermans/nix-homelab/main/install.sh
+sudo /run/current-system/sw/bin/bash install.sh

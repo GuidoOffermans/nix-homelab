@@ -1,13 +1,13 @@
 keys:
   - &macm2 age1lc7cualm2l0cgqt0p7meu2yzdnckjk40vkpenj46n2vll8t7z5js3ls4jc
-  - &pothos1 age1d0sl494ztscqs2fn4uml2ghdj8n2geuvsnyz8j0pj8p2fg075csszmftfz
-  - &pothos2
-  - &pothos3
+  - &pothos1 age1krzszhezd5raz4qc2pc894m4dv7wpz4lhuxnfk6ulkf4d5yf6v6q8ejc3v
+  # - &pothos2
+  # - &pothos3
 creation_rules:
   - path_regex: secrets/[^/]+(\.(yaml|json|env|ini|conf))?$
     key_groups:
       - age:
           - *macm2
           - *pothos1
-          - *pothos2
-          - *pothos3
+          # - *pothos2
+          # - *pothos3
