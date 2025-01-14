@@ -45,3 +45,8 @@ Linux detected
 
 curl -fsSL -o install.sh https://raw.githubusercontent.com/GuidoOffermans/nix-homelab/main/install.sh
 sudo /run/current-system/sw/bin/bash install.sh
+
+
+
+
+nix-store --delete /nix/store/*-source
