@@ -33,3 +33,12 @@ nvme0n1       259:0    0 238.5G  0 disk
   └─pool-root 254:0    0   238G  0 lvm  /nix/store
 
 ip: 10.10.10.21
+
+
+[nixos@isopothos:~]$ curl -fsSL -o install.sh https://raw.githubusercontent.com/GuidoOffermans/nix-homelab/main/install.sh
+
+[nixos@isopothos:~]$ which bash
+/run/current-system/sw/bin/bash
+
+[nixos@isopothos:~]$ sudo /run/current-system/sw/bin/bash install.sh
+Linux detected
