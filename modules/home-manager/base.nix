@@ -6,7 +6,7 @@
 {
   imports = [
     ./_packages.nix
-    ./_zsh.nix
+    # ./_zsh.nix
   ];
 
   home = {
