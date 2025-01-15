@@ -43,6 +43,7 @@
     neovim
     sops
     statix
+    nixos-rebuild
   ];
 
   programs.zsh.enable = true;

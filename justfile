@@ -8,7 +8,7 @@ deploy machine ip='':
   elif [ -z "{{ip}}" ]; then
     sudo nixos-rebuild switch --fast --flake ".#{{machine}}"
   else
-    nixos-rebuild switch --fast --flake ".#{{machine}}" --use-remote-sudo --target-host "pothos@{{ip}}" --build-host "pothos@{{ip}}"
+    nixos-rebuild switch --fast --flake ".#{{machine}}" --use-remote-sudo --target-host "pothos1" --build-host "pothos1"
   fi
 
 up:
