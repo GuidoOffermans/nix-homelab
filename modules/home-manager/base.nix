@@ -10,7 +10,10 @@
   ];
 
   home = {
-    username = "pothos";
+    username = lib.mkMerge [
+      (lib.mkIf pkgs.stdenv.isLinux "pothos")
+      (lib.mkIf pkgs.stdenv.isDarwin "guidooffermans")
+    ];
     homeDirectory = lib.mkMerge [
       (lib.mkIf pkgs.stdenv.isLinux "/home/pothos")
       (lib.mkIf pkgs.stdenv.isDarwin "/Users/guidooffermans")

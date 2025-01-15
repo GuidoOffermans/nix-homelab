@@ -93,6 +93,47 @@ elif [ "$(uname)" == "Linux" ]; then
   mount -o bind /mnt/nix/persist/var/log /mnt/var/log
   echo -e "\033[32mFilesystems mounted successfully.\033[0m"
 
+  if [[ "$FORMAT_SDA" == "y" ]]; then
+    echo -e "\n\033[1mPreparing and configuring /dev/sda...\033[0m"
+    # Check if /dev/sda exists
+    if [ -b /dev/sda ]; then
+      read -p "Do you want to encrypt /dev/sda? (y/N): " ENCRYPT_SDA
+      ENCRYPT_SDA=${ENCRYPT_SDA,,}  # Convert to lowercase for consistency
+
+      if [[ "$ENCRYPT_SDA" == "y" ]]; then
+        echo -e "\n\033[1mEncrypting /dev/sda...\033[0m"
+        # Partition and encrypt /dev/sda
+        parted /dev/sda -- mklabel gpt
+        parted /dev/sda -- mkpart Fun ext4 1MiB 100%
+        cryptsetup luksFormat /dev/sda1
+        cryptsetup open /dev/sda1 cryptfun
+        mkfs.ext4 -F -L fun /dev/mapper/cryptfun
+        echo -e "\033[32mDisk /dev/sda encrypted and formatted successfully.\033[0m"
+
+        # Mount encrypted /dev/sda1
+        mkdir -pv /mnt/fun
+        mount /dev/mapper/cryptfun /mnt/fun
+        echo -e "\033[32mEncrypted /fun partition mounted successfully.\033[0m"
+      else
+        echo -e "\n\033[1mFormatting /dev/sda without encryption...\033[0m"
+        # Partition and format /dev/sda
+        parted /dev/sda -- mklabel gpt
+        parted /dev/sda -- mkpart Fun ext4 1MiB 100%
+        mkfs.ext4 -F -L fun /dev/sda1
+        echo -e "\033[32mDisk /dev/sda formatted successfully.\033[0m"
+
+        # Mount unencrypted /dev/sda1
+        mkdir -pv /mnt/fun
+        mount /dev/disk/by-label/fun /mnt/fun
+        echo -e "\033[32mUnencrypted /fun partition mounted successfully.\033[0m"
+      fi
+    else
+      echo -e "\033[31mError: /dev/sda not found. Skipping /dev/sda setup.\033[0m"
+    fi
+  else
+    echo -e "\n\033[33mSkipping /dev/sda setup.\033[0m"
+  fi
+
   # Generating initrd SSH host key
   echo -e "\n\033[1mGenerating initrd SSH host key...\033[0m"
   ssh-keygen -t ed25519 -N "" -C "" -f /mnt/nix/secret/initrd/ssh_host_ed25519_key
