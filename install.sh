@@ -87,8 +87,8 @@ echo -e "\033[32mFilesystems mounted successfully.\033[0m"
 if [ -b /dev/sda ]; then
     echo -e "\n\033[1mFormatting /dev/sda without encryption...\033[0m"
     parted /dev/sda -- mklabel gpt
-    parted /dev/sda -- mkpart Fun ext4 1MiB 100%
-    mkfs.ext4 -F -L fun /dev/sda1
+    parted /dev/sda -- mkpart ssd ext4 1MiB 100%
+    mkfs.ext4 -F -L ssd /dev/sda1
     echo -e "\033[32mDisk /dev/sda formatted successfully.\033[0m"
 
     # Mount /dev/sda1
