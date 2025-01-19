@@ -93,7 +93,7 @@ if [ -b /dev/sda ]; then
 
     # Mount /dev/sda1
     mkdir -pv /mnt/ssd
-    mount /dev/disk/by-label/ssd /mnt/ssd
+    mount /dev/sda1 /mnt/ssd
     echo -e "\033[32mUnencrypted /ssd partition mounted successfully.\033[0m"
 else
     echo -e "\033[31mError: /dev/sda not found. Skipping /dev/sda setup.\033[0m"
