@@ -45,7 +45,7 @@
       device = "/dev/nvme0n1p2";
       fsType = "ext4";
     };
-    "/fun" = {
+    "/ssd" = {
       device = "/dev/sda1";
       fsType = "ext4";
     };

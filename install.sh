@@ -84,9 +84,7 @@ chmod 0700 /mnt/nix/secret
 mount -o bind /mnt/nix/persist/var/log /mnt/var/log
 echo -e "\033[32mFilesystems mounted successfully.\033[0m"
 
-if [[ "$FORMAT_SDA" == "y" ]]; then
-  echo -e "\n\033[1mPreparing and configuring /dev/sda...\033[0m"
-  if [ -b /dev/sda ]; then
+if [ -b /dev/sda ]; then
     echo -e "\n\033[1mFormatting /dev/sda without encryption...\033[0m"
     parted /dev/sda -- mklabel gpt
     parted /dev/sda -- mkpart Fun ext4 1MiB 100%
@@ -94,15 +92,13 @@ if [[ "$FORMAT_SDA" == "y" ]]; then
     echo -e "\033[32mDisk /dev/sda formatted successfully.\033[0m"
 
     # Mount /dev/sda1
-    mkdir -pv /mnt/fun
-    mount /dev/disk/by-label/fun /mnt/fun
-    echo -e "\033[32mUnencrypted /fun partition mounted successfully.\033[0m"
-  else
-    echo -e "\033[31mError: /dev/sda not found. Skipping /dev/sda setup.\033[0m"
-  fi
+    mkdir -pv /mnt/ssd
+    mount /dev/disk/by-label/ssd /mnt/ssd
+    echo -e "\033[32mUnencrypted /ssd partition mounted successfully.\033[0m"
 else
-  echo -e "\n\033[33mSkipping /dev/sda setup.\033[0m"
+    echo -e "\033[31mError: /dev/sda not found. Skipping /dev/sda setup.\033[0m"
 fi
+
 
 # Generating initrd SSH host key
 echo -e "\n\033[1mGenerating initrd SSH host key...\033[0m"
