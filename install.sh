@@ -34,119 +34,89 @@ if [ "$(uname)" == "Darwin" ]; then
   echo -e "\033[1mnix run nix-darwin -- switch --flake github:GuidoOffermans/nix-homelab#macm2\033[0m\n"
   echo -e "Remember to add the new host public key to sops-nix!"
 elif [ "$(uname)" == "Linux" ]; then
-  # Define disk
-  DISK="/dev/nvme0n1"
-  DISK_BOOT_PARTITION="/dev/nvme0n1p1"
-  DISK_NIX_PARTITION="/dev/nvme0n1p2"
+# Define disk
+DISK="/dev/nvme0n1"
+DISK_BOOT_PARTITION="/dev/nvme0n1p1"
+DISK_NIX_PARTITION="/dev/nvme0n1p2"
 
-  # Display warning and wait for confirmation to proceed
-  echo "Linux detected"
-  echo -e "\n\033[1;31m**Warning:** This script is irreversible and will prepare system for NixOS installation.\033[0m"
-  read -n 1 -s -r -p "Press any key to continue or Ctrl+C to abort..."
+# Display warning and wait for confirmation to proceed
+echo "Linux detected"
+echo -e "\n\033[1;31m**Warning:** This script is irreversible and will prepare system for NixOS installation.\033[0m"
+read -n 1 -s -r -p "Press any key to continue or Ctrl+C to abort..."
 
-  # Clear screen before showing disk layout
-  clear
+# Clear screen before showing disk layout
+clear
 
-  # Display disk layout
-  echo -e "\n\033[1mDisk Layout:\033[0m"
-  lsblk
-  echo ""
+# Display disk layout
+echo -e "\n\033[1mDisk Layout:\033[0m"
+lsblk
+echo ""
 
-  # Undo any previous changes if applicable
-  echo -e "\n\033[1mUndoing any previous changes...\033[0m"
-  set +e
-  umount -R /mnt
-  cryptsetup close cryptroot
-  set -e
-  echo -e "\033[32mPrevious changes undone.\033[0m"
+# Undo any previous changes if applicable
+echo -e "\n\033[1mUndoing any previous changes...\033[0m"
+set +e
+umount -R /mnt
+set -e
+echo -e "\033[32mPrevious changes undone.\033[0m"
 
-  # Partitioning disk
-  echo -e "\n\033[1mPartitioning disk...\033[0m"
-  parted $DISK -- mklabel gpt
-  parted $DISK -- mkpart ESP fat32 1MiB 512MiB
-  parted $DISK -- set 1 boot on
-  parted $DISK -- mkpart Nix 512MiB 100%
-  echo -e "\033[32mDisk partitioned successfully.\033[0m"
+# Partitioning disk
+echo -e "\n\033[1mPartitioning disk...\033[0m"
+parted $DISK -- mklabel gpt
+parted $DISK -- mkpart ESP fat32 1MiB 512MiB
+parted $DISK -- set 1 boot on
+parted $DISK -- mkpart Nix 512MiB 100%
+echo -e "\033[32mDisk partitioned successfully.\033[0m"
 
-  # Setting up encryption
-  echo -e "\n\033[1mSetting up encryption...\033[0m"
-  cryptsetup -q -v luksFormat $DISK_NIX_PARTITION
-  cryptsetup -q -v open $DISK_NIX_PARTITION cryptroot
-  echo -e "\033[32mEncryption setup completed.\033[0m"
+# Creating filesystems
+echo -e "\n\033[1mCreating filesystems...\033[0m"
+mkfs.fat -F32 -n boot $DISK_BOOT_PARTITION
+mkfs.ext4 -F -L nix $DISK_NIX_PARTITION
+echo -e "\033[32mFilesystems created successfully.\033[0m"
 
-  # Creating filesystems
-  echo -e "\n\033[1mCreating filesystems...\033[0m"
-  mkfs.fat -F32 -n boot $DISK_BOOT_PARTITION
-  mkfs.ext4 -F -L nix -m 0 /dev/mapper/cryptroot
-  # Let mkfs catch its breath
-  sleep 2
-  echo -e "\033[32mFilesystems created successfully.\033[0m"
+# Mounting filesystems
+echo -e "\n\033[1mMounting filesystems...\033[0m"
+mount -t tmpfs none /mnt
+mkdir -pv /mnt/{boot,nix,etc/ssh,var/{lib,log}}
+mount /dev/disk/by-label/boot /mnt/boot
+mount /dev/disk/by-label/nix /mnt/nix
+mkdir -pv /mnt/nix/{secret/initrd,persist/{etc/ssh,var/{lib,log}}}
+chmod 0700 /mnt/nix/secret
+mount -o bind /mnt/nix/persist/var/log /mnt/var/log
+echo -e "\033[32mFilesystems mounted successfully.\033[0m"
 
-  # Mounting filesystems
-  echo -e "\n\033[1mMounting filesystems...\033[0m"
-  mount -t tmpfs none /mnt
-  mkdir -pv /mnt/{boot,nix,etc/ssh,var/{lib,log}}
-  mount /dev/disk/by-label/boot /mnt/boot
-  mount /dev/disk/by-label/nix /mnt/nix
-  mkdir -pv /mnt/nix/{secret/initrd,persist/{etc/ssh,var/{lib,log}}}
-  chmod 0700 /mnt/nix/secret
-  mount -o bind /mnt/nix/persist/var/log /mnt/var/log
-  echo -e "\033[32mFilesystems mounted successfully.\033[0m"
+if [[ "$FORMAT_SDA" == "y" ]]; then
+  echo -e "\n\033[1mPreparing and configuring /dev/sda...\033[0m"
+  if [ -b /dev/sda ]; then
+    echo -e "\n\033[1mFormatting /dev/sda without encryption...\033[0m"
+    parted /dev/sda -- mklabel gpt
+    parted /dev/sda -- mkpart Fun ext4 1MiB 100%
+    mkfs.ext4 -F -L fun /dev/sda1
+    echo -e "\033[32mDisk /dev/sda formatted successfully.\033[0m"
 
-  if [[ "$FORMAT_SDA" == "y" ]]; then
-    echo -e "\n\033[1mPreparing and configuring /dev/sda...\033[0m"
-    # Check if /dev/sda exists
-    if [ -b /dev/sda ]; then
-      read -p "Do you want to encrypt /dev/sda? (y/N): " ENCRYPT_SDA
-      ENCRYPT_SDA=${ENCRYPT_SDA,,}  # Convert to lowercase for consistency
-
-      if [[ "$ENCRYPT_SDA" == "y" ]]; then
-        echo -e "\n\033[1mEncrypting /dev/sda...\033[0m"
-        # Partition and encrypt /dev/sda
-        parted /dev/sda -- mklabel gpt
-        parted /dev/sda -- mkpart Fun ext4 1MiB 100%
-        cryptsetup luksFormat /dev/sda1
-        cryptsetup open /dev/sda1 cryptfun
-        mkfs.ext4 -F -L fun /dev/mapper/cryptfun
-        echo -e "\033[32mDisk /dev/sda encrypted and formatted successfully.\033[0m"
-
-        # Mount encrypted /dev/sda1
-        mkdir -pv /mnt/fun
-        mount /dev/mapper/cryptfun /mnt/fun
-        echo -e "\033[32mEncrypted /fun partition mounted successfully.\033[0m"
-      else
-        echo -e "\n\033[1mFormatting /dev/sda without encryption...\033[0m"
-        # Partition and format /dev/sda
-        parted /dev/sda -- mklabel gpt
-        parted /dev/sda -- mkpart Fun ext4 1MiB 100%
-        mkfs.ext4 -F -L fun /dev/sda1
-        echo -e "\033[32mDisk /dev/sda formatted successfully.\033[0m"
-
-        # Mount unencrypted /dev/sda1
-        mkdir -pv /mnt/fun
-        mount /dev/disk/by-label/fun /mnt/fun
-        echo -e "\033[32mUnencrypted /fun partition mounted successfully.\033[0m"
-      fi
-    else
-      echo -e "\033[31mError: /dev/sda not found. Skipping /dev/sda setup.\033[0m"
-    fi
+    # Mount /dev/sda1
+    mkdir -pv /mnt/fun
+    mount /dev/disk/by-label/fun /mnt/fun
+    echo -e "\033[32mUnencrypted /fun partition mounted successfully.\033[0m"
   else
-    echo -e "\n\033[33mSkipping /dev/sda setup.\033[0m"
+    echo -e "\033[31mError: /dev/sda not found. Skipping /dev/sda setup.\033[0m"
   fi
+else
+  echo -e "\n\033[33mSkipping /dev/sda setup.\033[0m"
+fi
 
-  # Generating initrd SSH host key
-  echo -e "\n\033[1mGenerating initrd SSH host key...\033[0m"
-  ssh-keygen -t ed25519 -N "" -C "" -f /mnt/nix/secret/initrd/ssh_host_ed25519_key
-  echo -e "\033[32mSSH host key generated successfully.\033[0m"
+# Generating initrd SSH host key
+echo -e "\n\033[1mGenerating initrd SSH host key...\033[0m"
+ssh-keygen -t ed25519 -N "" -C "" -f /mnt/nix/secret/initrd/ssh_host_ed25519_key
+echo -e "\033[32mSSH host key generated successfully.\033[0m"
 
-  # Creating public age key for sops-nix
-  echo -e "\n\033[1mConverting initrd public SSH host key into public age key for sops-nix...\033[0m"
-  sudo nix-shell --extra-experimental-features flakes -p ssh-to-age --run 'cat /mnt/nix/secret/initrd/ssh_host_ed25519_key.pub | ssh-to-age'
-  echo -e "\033[32mAge public key generated successfully.\033[0m"
+# Creating public age key for sops-nix
+echo -e "\n\033[1mConverting initrd public SSH host key into public age key for sops-nix...\033[0m"
+sudo nix-shell --extra-experimental-features flakes -p ssh-to-age --run 'cat /mnt/nix/secret/initrd/ssh_host_ed25519_key.pub | ssh-to-age'
+echo -e "\033[32mAge public key generated successfully.\033[0m"
 
-  # Completed
-  echo -e "\n\033[1;32mAll steps completed successfully. NixOS is now ready to be installed.\033[0m\n"
-  echo -e "Remember to commit and push the new server's public host key to sops-nix/update all sops encrypted files before installing!"
-  echo -e "To install NixOS configuration for hostname, run the following command:\n"
-  echo -e "\033[1msudo nixos-install --no-root-passwd --root /mnt --flake github:GuidoOffermans/nix-homelab#hostname\033[0m\n"
+# Completed
+echo -e "\n\033[1;32mAll steps completed successfully. NixOS is now ready to be installed.\033[0m\n"
+echo -e "Remember to commit and push the new server's public host key to sops-nix/update all sops encrypted files before installing!"
+echo -e "To install NixOS configuration for hostname, run the following command:\n"
+echo -e "\033[1msudo nixos-install --no-root-passwd --root /mnt --flake github:GuidoOffermans/nix-homelab#hostname\033[0m\n"
 fi
